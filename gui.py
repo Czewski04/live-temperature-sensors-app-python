@@ -71,6 +71,24 @@ class VotingAlgorithmsApp(ctk.CTk):
                 'is_active': False,
                 'data': [],
                 'colour': self.colour_pool[1]
+            },
+            {
+                'name': 'Advanced m out of n',
+                'is_active': False,
+                'data': [],
+                'colour': self.colour_pool[2]
+            },
+            {
+                'name': 'Majority',
+                'is_active': False,
+                'data': [],
+                'colour': self.colour_pool[3]
+            },
+            {
+                'name': 'Average Adaptive',
+                'is_active': False,
+                'data': [],
+                'colour': self.colour_pool[4]
             }
         ]
 
@@ -79,7 +97,7 @@ class VotingAlgorithmsApp(ctk.CTk):
 
         self.voter = Voter()
 
-        self.geometry("1100x800")
+        self.geometry("1200x800")
         self.title("Voting Algorithms Visualization")
         self.create_frames()
 
@@ -220,7 +238,7 @@ class VotingAlgorithmsApp(ctk.CTk):
         self.y_data_lists = [[] for _ in range(self.num_sensors)]
         self.y_data_lists_smoothed = [[] for _ in range(self.num_sensors)]
         self.backend.resume()
-        self.voter.update_votes(self.voting_alg[0]['is_active'], self.voting_alg[1]['is_active'])
+        self.voter.update_votes(self.voting_alg[0]['is_active'], self.voting_alg[1]['is_active'], self.voting_alg[2]['is_active'], self.voting_alg[3]['is_active'], self.voting_alg[4]['is_active'])
         self.is_chart_paused = False
         plt.style.use('dark_background')
         self.fig, self.ax = plt.subplots()
@@ -243,7 +261,12 @@ class VotingAlgorithmsApp(ctk.CTk):
                     if not data or len(data) != self.num_sensors:
                         continue
                     data_updated = True
-                    voted_data = self.voter.vote(data)
+
+                    historical_m_out_of_n_result = None
+                    for voter in self.voting_alg:
+                        if voter['name'] == 'Advanced m out of n' and voter['data']:
+                            historical_m_out_of_n_result  = voter['data'][-1] if voter['data'] else 0
+                    voted_data = self.voter.vote(data, historical_m_out_of_n_result)
 
                     self.x_data.append(self.x_data[-1] + self.reading_frequency if self.x_data else 0)
                     for i in range(self.num_sensors):
@@ -277,9 +300,12 @@ class VotingAlgorithmsApp(ctk.CTk):
                 name = voter['name']
                 data_list = voter['data']
                 color = voter['colour']
-                last_val = data_list[-1]
-                label_text = f'{name}: {last_val:.2f}ºC'
-                self.ax.plot(self.x_data, data_list, label=label_text, color=color, linewidth=2)
+                if data_list[-1] is None:
+                    label_text = f'{name:<{19}}: no correct data'
+                else:
+                    last_val = float(data_list[-1])
+                    label_text = f'{name:<{19}}: {last_val:>11.2f}ºC'
+                self.ax.plot(self.x_data, data_list, label=label_text, color=color, linewidth=3)
         for i in range(self.num_sensors):
             if voting_is_active:
                 self.ax.plot(self.x_data, self.y_data_lists_smoothed[i], label=f'Sensor {i+1}: {self.y_data_lists[i][-1]}ºC', color=self.colour_pool_2[i % len(self.colour_pool_2)], linestyle='--', linewidth=0.5)
@@ -287,7 +313,7 @@ class VotingAlgorithmsApp(ctk.CTk):
                 self.ax.plot(self.x_data, self.y_data_lists_smoothed[i], label=f'Sensor {i+1}: {self.y_data_lists[i][-1]}ºC', color=self.colour_pool[i % len(self.colour_pool)])
         self.ax.grid(True)
         self.ax.grid(True, linestyle='--', alpha=0.3)
-        self.ax.legend(loc="upper left")
+        self.ax.legend(loc="upper left", prop={'family': 'monospace' ,'size': 10})
         self.ax.set_xlabel("Time [s]")
         self.ax.set_ylabel("Temperature [ºC]")
         self.ax.set_title("Temperature Live Data")
@@ -306,6 +332,7 @@ class VotingAlgorithmsApp(ctk.CTk):
 
     def close_application(self):
         self.destroy()
+        self.backend.close_connection()
 
 
     def back_to_menu_and_delete(self):
@@ -506,7 +533,7 @@ class VotingAlgorithmsApp(ctk.CTk):
 
     def update_status(self, voter):
         voter['is_active'] = not voter['is_active']
-        self.voter.update_votes(self.voting_alg[0]['is_active'], self.voting_alg[1]['is_active'])
+        self.voter.update_votes(self.voting_alg[0]['is_active'], self.voting_alg[1]['is_active'], self.voting_alg[2]['is_active'], self.voting_alg[3]['is_active'], self.voting_alg[4]['is_active'])
 
 if __name__ == '__main__':
     app = VotingAlgorithmsApp()

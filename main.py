@@ -59,7 +59,6 @@ class ModbusBackend:
         if self.instrument.serial.is_open:
             self.instrument.serial.close()
 
-
     def pause(self):
         self.running_event.clear()
 
