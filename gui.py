@@ -64,31 +64,36 @@ class VotingAlgorithmsApp(ctk.CTk):
                 'name': 'Average',
                 'is_active': False,
                 'data': [],
-                'colour': self.colour_pool[0]
+                'colour': self.colour_pool[2],
+                'linestyle': '-',
             },
             {
                 'name': 'Median',
                 'is_active': False,
                 'data': [],
-                'colour': self.colour_pool[1]
+                'colour': self.colour_pool[3],
+                'linestyle': '-',
             },
             {
                 'name': 'Advanced m out of n',
                 'is_active': False,
                 'data': [],
-                'colour': self.colour_pool[2]
+                'colour': self.colour_pool[0],
+                'linestyle': '-'
             },
             {
                 'name': 'Majority',
                 'is_active': False,
                 'data': [],
-                'colour': self.colour_pool[3]
+                'colour': self.colour_pool[1],
+                'linestyle': '--',
             },
             {
                 'name': 'Average Adaptive',
                 'is_active': False,
                 'data': [],
-                'colour': self.colour_pool[4]
+                'colour': self.colour_pool[4],
+                'linestyle': ':',
             }
         ]
 
@@ -263,10 +268,13 @@ class VotingAlgorithmsApp(ctk.CTk):
                     data_updated = True
 
                     historical_m_out_of_n_result = None
+                    historical_average_adaptive_result = None
                     for voter in self.voting_alg:
                         if voter['name'] == 'Advanced m out of n' and voter['data']:
                             historical_m_out_of_n_result  = voter['data'][-1] if voter['data'] else 0
-                    voted_data = self.voter.vote(data, historical_m_out_of_n_result)
+                        if voter['name'] == 'Average Adaptive' and voter['data']:
+                            historical_average_adaptive_result  = voter['data'][-1] if voter['data'] else 0
+                    voted_data = self.voter.vote(data, historical_m_out_of_n_result, historical_average_adaptive_result)
 
                     self.x_data.append(self.x_data[-1] + self.reading_frequency if self.x_data else 0)
                     for i in range(self.num_sensors):
@@ -300,15 +308,16 @@ class VotingAlgorithmsApp(ctk.CTk):
                 name = voter['name']
                 data_list = voter['data']
                 color = voter['colour']
+                linestyle = voter['linestyle']
                 if data_list[-1] is None:
                     label_text = f'{name:<{19}}: no correct data'
                 else:
                     last_val = float(data_list[-1])
                     label_text = f'{name:<{19}}: {last_val:>11.2f}ºC'
-                self.ax.plot(self.x_data, data_list, label=label_text, color=color, linewidth=3)
+                self.ax.plot(self.x_data, data_list, label=label_text, color=color, linestyle=linestyle, linewidth=4)
         for i in range(self.num_sensors):
             if voting_is_active:
-                self.ax.plot(self.x_data, self.y_data_lists_smoothed[i], label=f'Sensor {i+1}: {self.y_data_lists[i][-1]}ºC', color=self.colour_pool_2[i % len(self.colour_pool_2)], linestyle='--', linewidth=0.5)
+                self.ax.plot(self.x_data, self.y_data_lists_smoothed[i], label=f'Sensor {i+1}: {self.y_data_lists[i][-1]}ºC', color=self.colour_pool_2[i % len(self.colour_pool_2)], linestyle='--', linewidth=0.8)
             else:
                 self.ax.plot(self.x_data, self.y_data_lists_smoothed[i], label=f'Sensor {i+1}: {self.y_data_lists[i][-1]}ºC', color=self.colour_pool[i % len(self.colour_pool)])
         self.ax.grid(True)
@@ -418,28 +427,6 @@ class VotingAlgorithmsApp(ctk.CTk):
 
         dialog.grab_set()
         self.wait_window(dialog)
-
-    # def input_sensors(self, message="Type number of sensors (0<x<7):"):
-    #     dialog = ctk.CTkInputDialog(text=message, title="Number of Sensors Configuration")
-    #     num_sensors = dialog.get_input()
-    #     if not num_sensors:
-    #         num_sensors = self.input_sensors("Type a number, not letters! 0<x<7:")
-    #     elif (not num_sensors.isdigit()) or (not (0 < int(num_sensors) < 7)):
-    #         num_sensors = self.input_sensors("Type a number, not letters! Must be greater than 0 and less than 7:")
-    #     return int(num_sensors)
-    #
-    # def input_frequency(self, message="Type reading frequency in seconds (default 1s):"):
-    #     dialog = ctk.CTkInputDialog(text=message, title="Reading Frequency Configuration")
-    #     frequency = dialog.get_input()
-    #     if not frequency:
-    #         frequency = 1
-    #     try:
-    #         frequency = float(frequency)
-    #         if frequency < 0:
-    #             frequency = self.input_frequency("Type a number, not letters! Must be greater than 0")
-    #     except ValueError:
-    #         frequency = self.input_frequency("Type a number, not letters! Must be greater than 0")
-    #     return float(frequency)
 
     def saving_file(self):
         dialog = ctk.CTkToplevel(self)

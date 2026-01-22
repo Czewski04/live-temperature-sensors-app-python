@@ -114,12 +114,12 @@ class Voter:
                 return np.average(groups_list[i])
         return None
 
-    def average_adaptive_voting(self, data):
+    def average_adaptive_voting(self, data, historical_average_adaptive_result):
         if len(self.active_status_list) < len(data) and len(self.error_count) < len(data):
             for i in range(len(data)-len(self.active_status_list)):
                 self.active_status_list.append(True)
                 self.error_count.append(0)
-        max_error_count = 10
+        max_error_count = 2
         deviation_threshold = 1.0
         total_value = 0.0
         counter = 0
@@ -144,12 +144,20 @@ class Voter:
         average = total_value / counter
         for i in range(len(data)):
             if self.active_status_list[i]:
-                if abs(data[i] - average) > deviation_threshold:
-                    self.error_count[i] += 1
-                    if self.error_count[i] >= max_error_count:
-                        self.active_status_list[i] = False
+                if historical_average_adaptive_result is not None:
+                    if abs(data[i] - historical_average_adaptive_result) > deviation_threshold and abs(data[i] - average) > deviation_threshold:
+                        self.error_count[i] += 1
+                        if self.error_count[i] >= max_error_count:
+                            self.active_status_list[i] = False
+                    else:
+                        self.error_count[i] = 0
                 else:
-                    self.error_count[i] = 0
+                    if abs(data[i] - average) > deviation_threshold:
+                        self.error_count[i] += 1
+                        if self.error_count[i] >= max_error_count:
+                            self.active_status_list[i] = False
+                    else:
+                        self.error_count[i] = 0
         for i in range(len(data)):
             if not self.active_status_list[i]:
                 if abs(data[i] - average) <= deviation_threshold:
@@ -158,20 +166,21 @@ class Voter:
                         self.active_status_list[i] = True
                 else:
                     self.error_count[i] = max_error_count
+        print(self.error_count)
         return average
 
-    def vote(self, data, history_result):
+    def vote(self, data, historical_m_out_of_n_result, historical_average_adaptive_result):
         results = {}
         if self.avg:
             results['Average'] = self.average_voting(data)
         if self.median:
             results['Median'] = self.median_voting(data)
         if self.adv_out_of_n:
-            results['Advanced m out of n'] = self.advanced_m_out_of_n_voting(data, history_result)
+            results['Advanced m out of n'] = self.advanced_m_out_of_n_voting(data, historical_m_out_of_n_result)
         if self.majority:
             results['Majority'] = self.majority_voting(data)
         if self.average_adaptive:
-            results['Average Adaptive'] = self.average_adaptive_voting(data)
+            results['Average Adaptive'] = self.average_adaptive_voting(data, historical_average_adaptive_result)
 
         return results
 
