@@ -1,4 +1,4 @@
-# Sensor Fusion Application
+# Live Temperature Sensor Tracking App with Voting
 
 A real-time temperature monitoring and sensor fusion application with advanced voting algorithms for data validation and fault tolerance.
 
