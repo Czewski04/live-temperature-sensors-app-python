@@ -2,6 +2,9 @@
 
 A real-time temperature monitoring and sensor fusion application with advanced voting algorithms for data validation and fault tolerance.
 
+<img width="1180" height="641" alt="chart1" src="https://github.com/user-attachments/assets/ff9212b8-8dac-4b2b-a99e-b7b503b38616" />
+
+
 ## 📋 Overview
 
 This application reads temperature data from multiple sensors via Modbus RTU protocol and applies various voting algorithms to determine the most reliable temperature reading. The system provides real-time visualization, configurable sensor fusion strategies, and comprehensive fault detection mechanisms.
@@ -24,35 +27,39 @@ This application reads temperature data from multiple sensors via Modbus RTU pro
 - **Data Export**: Save charts as PNG images or export raw data to CSV
 - **Thread-Safe Architecture**: Robust multi-threaded design with proper synchronization
 
+<p align="center">
+  <img width="1180" height="641" alt="chart3" src="https://github.com/user-attachments/assets/6eb6f5ba-dd3e-49b4-aaed-166617db568f" />
+</p>
+
 ## 🏗️ Architecture
 
 The application follows **Clean Architecture** and **Layered Architecture** principles with clear separation of concerns:
 
 ```
 sensor_fusion_app/
-├── config/              # Configuration layer
-│   ├── settings.py      # Application constants and settings
+├── config/                    # Configuration layer
+│   ├── settings.py            # Application constants and settings
 │   └── __init__.py
-├── core/                # Business logic layer
-│   ├── interfaces.py    # Abstract base classes (Strategy Pattern)
-│   ├── algorithms.py    # Voting algorithm implementations
+├── core/                      # Business logic layer
+│   ├── interfaces.py          # Abstract base classes (Strategy Pattern)
+│   ├── algorithms.py          # Voting algorithm implementations
 │   └── __init__.py
-├── infrastructure/      # External communication layer
-│   ├── modbus_service.py  # Modbus RTU communication service
+├── infrastructure/            # External communication layer
+│   ├── modbus_service.py      # Modbus RTU communication service
 │   └── __init__.py
-├── ui/                  # Presentation layer
-│   ├── main_window.py   # Main application window
-│   ├── chart_widget.py  # Matplotlib chart component
+├── ui/                        # Presentation layer
+│   ├── main_window.py         # Main application window
+│   ├── chart_widget.py        # Matplotlib chart component
 │   ├── components/
-│   │   ├── controls.py       # Control buttons panel
-│   │   ├── settings_panel.py # Settings sliders and checkboxes
+│   │   ├── controls.py        # Control buttons panel
+│   │   ├── settings_panel.py  # Settings sliders and checkboxes
 │   │   └── __init__.py
 │   └── __init__.py
-├── utils/               # Utility layer
-│   ├── data_parser.py   # Modbus data parsing utilities
+├── utils/                     # Utility layer
+│   ├── data_parser.py         # Modbus data parsing utilities
 │   └── __init__.py
-├── main.py              # Application entry point
-└── requirements.txt     # Python dependencies
+├── main.py                    # Application entry point
+└── requirements.txt           # Python dependencies
 ```
 
 ### Design Patterns
